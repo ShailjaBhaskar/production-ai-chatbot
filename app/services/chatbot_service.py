@@ -14,6 +14,13 @@ from app.services.memory_service import (
 
 from typing import AsyncGenerator
 
+
+from app.services.db_memory_service import (
+    save_message,
+    get_history
+)
+
+
 # STEP 1 — Create LLM
 llm = ChatOpenAI(
     model="gpt-4o-mini",
@@ -64,30 +71,82 @@ User Question:
 chain = prompt | llm | StrOutputParser()
 
 
-# STEP 4 — Main chat function
-def chat(query):
+# # STEP 4 — Main chat function
+# def chat(query):
 
-    # Add user message to memory
-    add_user_message(query)
+#     # Add user message to memory
+#     add_user_message(query)
 
 
-    # Retrieve relevant docs
+#     # Retrieve relevant docs
+#     retrieved_docs = retriever.invoke(query)
+
+
+#     # Extract retrieved text
+#     context = "\n".join(
+#         [doc.page_content for doc in retrieved_docs]
+#     )
+
+
+#     # Extract memory text
+#     history = "\n".join(
+#         [msg.content for msg in get_chat_history()]
+#     )
+
+
+#     # Generate response
+#     response = chain.invoke({
+
+#         "history": history,
+
+#         "context": context,
+
+#         "question": query
+#     })
+
+
+#     # Save AI response
+#     add_ai_message(response)
+
+
+#     return response
+
+
+def chat(user_id, query):
+
+
+    # STEP 1 — Save user message
+    save_message(
+        user_id,
+        "user",
+        query
+    )
+
+
+    # STEP 2 — Retrieve relevant docs
     retrieved_docs = retriever.invoke(query)
 
 
-    # Extract retrieved text
+    # STEP 3 — Build context
     context = "\n".join(
         [doc.page_content for doc in retrieved_docs]
     )
 
 
-    # Extract memory text
+    # STEP 4 — Get user conversation history
+    messages = get_history(user_id)
+
+
+    # STEP 5 — Convert history to text
     history = "\n".join(
-        [msg.content for msg in get_chat_history()]
+        [
+            f"{msg.role}: {msg.content}"
+            for msg in messages
+        ]
     )
 
 
-    # Generate response
+    # STEP 6 — Generate AI response
     response = chain.invoke({
 
         "history": history,
@@ -98,8 +157,12 @@ def chat(query):
     })
 
 
-    # Save AI response
-    add_ai_message(response)
+    # STEP 7 — Save AI response
+    save_message(
+        user_id,
+        "assistant",
+        response
+    )
 
 
     return response

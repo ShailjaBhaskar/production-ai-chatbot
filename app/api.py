@@ -20,6 +20,8 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from app.services.chatbot_service import stream_chat
+from app.models.request_models import QueryRequest
+from app.services.chatbot_service import chat
 
 import asyncio
 
@@ -63,3 +65,19 @@ async def stream_chat_endpoint(query: str):
 
         media_type="text/plain"
     )
+
+@app.post("/chat")
+async def chat_endpoint(request: QueryRequest):
+
+
+    response = chat(
+
+        request.user_id,
+
+        request.query
+    )
+
+
+    return {
+        "response": response
+    }

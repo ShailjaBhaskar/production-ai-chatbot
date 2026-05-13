@@ -23,7 +23,7 @@ def save_message(user_id, role, content):
     db.close()
 
 
-# STEP 2 — Get conversation history
+# STEP 2 — Get user-specific history
 def get_history(user_id):
 
     db = SessionLocal()
