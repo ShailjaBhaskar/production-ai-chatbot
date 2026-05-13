@@ -22,7 +22,8 @@ from fastapi.responses import StreamingResponse
 from app.services.chatbot_service import stream_chat
 from app.models.request_models import QueryRequest
 from app.services.chatbot_service import chat
-
+from fastapi import BackgroundTasks
+import time
 import asyncio
 
 
@@ -81,3 +82,40 @@ async def chat_endpoint(request: QueryRequest):
     return {
         "response": response
     }
+
+def process_document(filename):
+
+
+    print(f"Started processing: {filename}")
+
+
+    # Simulate slow AI work
+    time.sleep(10)
+
+
+    print(f"Finished processing: {filename}")
+
+
+@app.post("/upload")
+async def upload_document(
+
+
+    background_tasks: BackgroundTasks
+):
+
+
+    filename = "sample.pdf"
+
+
+    # Add background task
+    background_tasks.add_task(
+
+        process_document,
+
+        filename
+    )
+
+
+    return {
+        "message": "Document processing started"
+    }    
